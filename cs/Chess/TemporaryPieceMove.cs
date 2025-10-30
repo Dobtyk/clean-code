@@ -4,6 +4,8 @@ namespace Chess
 {
     public class TemporaryPieceMove : IDisposable
     {
+        public Board Board => board;
+
         private readonly Board board;
         private readonly Location from;
         private readonly Piece oldDestinationPiece;
