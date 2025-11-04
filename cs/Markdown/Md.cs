@@ -2,8 +2,8 @@
 
 public class Md
 {
-    private readonly ParserMarkdown parser = new();
-    private readonly HtmlRenderer renderer = new();
+    private readonly IParser parser = new MarkdownParser();
+    private readonly IRenderer renderer = new HtmlRenderer();
     
     public string Render(string markdownText)
     {

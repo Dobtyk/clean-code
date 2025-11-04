@@ -2,13 +2,13 @@
 
 public class Token
 {
-    private TypeTag typeTag;
+    private TagType tagType;
     private string content;
     private List<Token>? children;
 
-    public Token(TypeTag typeTag, string content, List<Token>? children = null)
+    public Token(TagType tagType, string content, List<Token>? children = null)
     {
-        this.typeTag = typeTag;
+        this.tagType = tagType;
         this.content = content;
         this.children = children;
     }

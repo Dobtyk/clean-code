@@ -1,6 +1,6 @@
 ﻿namespace Markdown;
 
-public enum TypeTag
+public enum TagType
 {
     None,
     Header,

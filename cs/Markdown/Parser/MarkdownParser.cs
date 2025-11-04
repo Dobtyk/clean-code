@@ -1,6 +1,6 @@
 ﻿namespace Markdown;
 
-public class ParserMarkdown: IParser
+public class MarkdownParser: IParser
 {
     public IEnumerable<Token> Parse(string text)
     {

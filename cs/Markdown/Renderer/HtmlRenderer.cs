@@ -2,9 +2,9 @@
 
 public class HtmlRenderer : IRenderer
 {
-    private readonly Dictionary<TypeTag, string> tags = new()
+    private readonly Dictionary<TagType, string> tags = new()
     {
-        { TypeTag.Header, "h1" },
+        { TagType.Header, "h1" },
         // TODO: add values
     };
     
