@@ -11,6 +11,7 @@ public class HtmlRenderer : IRenderer
         { TagType.Italic, new HtmlTag(true, "<em>", "</em>") },
         { TagType.Bold, new HtmlTag(true, "<strong>", "</strong>") },
         { TagType.Escaping, new HtmlTag(true, "\\") },
+        { TagType.EndOfLine, new HtmlTag(false, "\n") }
         //{ TagType.Link, "<strong>" },
     };
     
@@ -28,9 +29,9 @@ public class HtmlRenderer : IRenderer
     
     private string RenderToken(Token token)
     {
+        var tag = tags[token.TagType];
         if (token.Children is null)
         {
-            var tag = tags[token.TagType];
             return tag.IsPairedTag ? $"{tag.StartTag}{token.Content}{tag.EndTag}" : $"{tag.StartTag}{token.Content}";
         }
 
@@ -39,6 +40,8 @@ public class HtmlRenderer : IRenderer
         {
             stringBuilder.Append(RenderToken(child));
         }
+        stringBuilder.Insert(0, tag.StartTag);
+        stringBuilder.Append(tag.EndTag);
         
         return stringBuilder.ToString();
     }
