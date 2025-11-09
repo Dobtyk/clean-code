@@ -17,7 +17,7 @@ public class MdTests
     }
 
     [TestCase("wordA wordB")]
-    public void Parse_ReturnsString_WhenTextWithoutTags(string input)
+    public void Render_ReturnsString_WhenTextWithoutTags(string input)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -26,7 +26,7 @@ public class MdTests
 
     [TestCaseSource(nameof(CasesWhenTextWithOnePairedTag))]
     [Description("Checks each paired tag")]
-    public void Parse_ReturnsString_WhenTextWithOnePairedTag(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextWithOnePairedTag(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -34,7 +34,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenTextWithMultipleNonNestedPairedTags))]
-    public void Parse_ReturnsString_WhenTextWithMultipleNonNestedPairedTags(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextWithMultipleNonNestedPairedTags(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -42,7 +42,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenTextWithMultipleNestedPairedTags))]
-    public void Parse_ReturnsString_WhenTextWithMultipleNestedPairedTags(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextWithMultipleNestedPairedTags(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -51,7 +51,7 @@ public class MdTests
 
     [TestCaseSource(nameof(CasesWhenTextWithPairedTagWithoutPair))]
     [Description("Checks each paired tag")]
-    public void Parse_ReturnsString_WhenTextWithPairedTagWithoutPair(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextWithPairedTagWithoutPair(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -59,7 +59,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenEmptyTextInsideTags))]
-    public void Parse_ReturnsString_WhenEmptyTextInsideTags(string input, string expectedResult)
+    public void Render_ReturnsString_WhenEmptyTextInsideTags(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -67,7 +67,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesTextContainsHeaderTag))]
-    public void Parse_ReturnsString_WhenTextContainsHeaderTag(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextContainsHeaderTag(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -75,7 +75,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenTextContainsEscapingTag))]
-    public void Parse_ReturnsString_WhenTextContainsEscapingTag(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextContainsEscapingTag(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -83,7 +83,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenTextContainsOverlappingTags))]
-    public void Parse_ReturnsString_WhenTextContainsOverlappingTags(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextContainsOverlappingTags(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -91,7 +91,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenBoldTagInsideItalicTag))]
-    public void Parse_ReturnsString_WhenBoldTagInsideItalicTag(string input, string expectedResult)
+    public void Render_ReturnsString_WhenBoldTagInsideItalicTag(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -99,7 +99,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenItalicTagInsideBoldTag))]
-    public void Parse_ReturnsString_WhenItalicTagInsideBoldTag(string input, string expectedResult)
+    public void Render_ReturnsString_WhenItalicTagInsideBoldTag(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -107,7 +107,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenTextWithNumbersAndContainsBoldItalicTags))]
-    public void Parse_ReturnsString_WhenTextWithNumbersAndContainsBoldItalicTags(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextWithNumbersAndContainsBoldItalicTags(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -115,7 +115,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenTextWithWhiteSpaceAndContainsBoldItalicTags))]
-    public void Parse_ReturnsString_WhenTextWithWhiteSpaceAndContainsBoldItalicTags(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextWithWhiteSpaceAndContainsBoldItalicTags(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
@@ -123,7 +123,7 @@ public class MdTests
     }
 
     [TestCaseSource(nameof(CasesWhenTextContainsBoldItalicTagsInMiddleWords))]
-    public void Parse_ReturnsString_WhenTextContainsBoldItalicTagsInMiddleWords(string input, string expectedResult)
+    public void Render_ReturnsString_WhenTextContainsBoldItalicTagsInMiddleWords(string input, string expectedResult)
     {
         var result = renderer.Render(parser.Parse(input));
 
