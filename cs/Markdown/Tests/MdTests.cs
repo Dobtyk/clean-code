@@ -6,20 +6,18 @@ namespace Markdown.Tests;
 [TestFixture]
 public class MdTests
 {
-    private IParser parser;
-    private IRenderer renderer;
+    private Md markdown;
 
     [SetUp]
     public void SetUp()
     {
-        parser = new MarkdownParser();
-        renderer = new HtmlRenderer();
+        markdown = new Md();
     }
 
     [TestCase("wordA wordB")]
     public void Render_ReturnsString_WhenTextWithoutTags(string input)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be("wordA wordB");
     }
@@ -28,7 +26,7 @@ public class MdTests
     [Description("Checks each paired tag")]
     public void Render_ReturnsString_WhenTextWithOnePairedTag(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -36,7 +34,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenTextWithMultipleNonNestedPairedTags))]
     public void Render_ReturnsString_WhenTextWithMultipleNonNestedPairedTags(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -44,7 +42,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenTextWithMultipleNestedPairedTags))]
     public void Render_ReturnsString_WhenTextWithMultipleNestedPairedTags(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -53,7 +51,7 @@ public class MdTests
     [Description("Checks each paired tag")]
     public void Render_ReturnsString_WhenTextWithPairedTagWithoutPair(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -61,7 +59,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenEmptyTextInsideTags))]
     public void Render_ReturnsString_WhenEmptyTextInsideTags(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -69,7 +67,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesTextContainsHeaderTag))]
     public void Render_ReturnsString_WhenTextContainsHeaderTag(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -77,7 +75,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenTextContainsEscapingTag))]
     public void Render_ReturnsString_WhenTextContainsEscapingTag(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -85,7 +83,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenTextContainsOverlappingTags))]
     public void Render_ReturnsString_WhenTextContainsOverlappingTags(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -93,7 +91,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenBoldTagInsideItalicTag))]
     public void Render_ReturnsString_WhenBoldTagInsideItalicTag(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -101,7 +99,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenItalicTagInsideBoldTag))]
     public void Render_ReturnsString_WhenItalicTagInsideBoldTag(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -109,7 +107,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenTextWithNumbersAndContainsBoldItalicTags))]
     public void Render_ReturnsString_WhenTextWithNumbersAndContainsBoldItalicTags(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -117,7 +115,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenTextWithWhiteSpaceAndContainsBoldItalicTags))]
     public void Render_ReturnsString_WhenTextWithWhiteSpaceAndContainsBoldItalicTags(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
@@ -125,7 +123,7 @@ public class MdTests
     [TestCaseSource(nameof(CasesWhenTextContainsBoldItalicTagsInMiddleWords))]
     public void Render_ReturnsString_WhenTextContainsBoldItalicTagsInMiddleWords(string input, string expectedResult)
     {
-        var result = renderer.Render(parser.Parse(input));
+        var result = markdown.Render(input);
 
         result.Should().Be(expectedResult);
     }
