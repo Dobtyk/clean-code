@@ -8,4 +8,5 @@ public enum TagType
     Bold,
     Escaping,
     Link,
+    EndOfLine
 }

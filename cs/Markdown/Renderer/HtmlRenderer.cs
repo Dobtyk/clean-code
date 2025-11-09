@@ -4,8 +4,11 @@ public class HtmlRenderer : IRenderer
 {
     private readonly Dictionary<TagType, string> tags = new()
     {
-        { TagType.Header, "h1" },
-        // TODO: add values
+        { TagType.Header, "<h1>" },
+        { TagType.Italic, "<em>" },
+        { TagType.Bold, "<strong>" },
+        { TagType.Escaping, "\\" },
+        { TagType.Link, "<strong>" },
     };
     
     public string Render(IEnumerable<Token> tokens)

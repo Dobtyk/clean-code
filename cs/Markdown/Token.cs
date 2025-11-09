@@ -1,15 +1,10 @@
 ﻿namespace Markdown;
 
-public class Token
+public class Token(TagType tagType, string content, List<Token>? children = null)
 {
-    private TagType tagType;
-    private string content;
-    private List<Token>? children;
+    public TagType TagType { get; } = tagType;
 
-    public Token(TagType tagType, string content, List<Token>? children = null)
-    {
-        this.tagType = tagType;
-        this.content = content;
-        this.children = children;
-    }
+    public string Content { get; } = content;
+
+    public List<Token>? Children { get; set; } = children;
 }
