@@ -20,9 +20,9 @@ public class MarkdownParserTests
     }
     
     [TestCase("wordA wordB")]
-    public void Parse_ReturnsIEnumerableTokens_WhenTextWithoutTags(string text)
+    public void Parse_ReturnsIEnumerableTokens_WhenTextWithoutTags(string input)
     {
-        var result = parser.Parse(text);
+        var result = parser.Parse(input);
         
         result.Should().BeEquivalentTo([new Token(TagType.None, "wordA wordB")]);
     }

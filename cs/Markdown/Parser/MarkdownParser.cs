@@ -2,13 +2,13 @@
 
 public class MarkdownParser: IParser
 {
-    private static readonly Dictionary<TagType, Tag> tags = new()
+    private static readonly Dictionary<TagType, MarkdownTag> tags = new()
     {
-        { TagType.Header, new Tag("# ", false) },
-        { TagType.Italic, new Tag("_", true) },
-        { TagType.Bold, new Tag("__", true) },
-        { TagType.Escaping, new Tag("\\", false, 2 ) },
-        { TagType.EndOfLine, new Tag("\n", false) },
+        { TagType.Header, new MarkdownTag("# ", false) },
+        { TagType.Italic, new MarkdownTag("_", true) },
+        { TagType.Bold, new MarkdownTag("__", true) },
+        { TagType.Escaping, new MarkdownTag("\\", false, 2 ) },
+        { TagType.EndOfLine, new MarkdownTag("\n", false) },
         //{ TagType.Link, "" },
     };
     
@@ -331,19 +331,21 @@ public class MarkdownParser: IParser
     
     private static Token CreateToken(string text, int endPosition, OpenToken openToken)
     {
+        var length = endPosition - openToken.TextStartPosition;
+        
         if (CheckOpenTokenTagBoldOrItalicLocatedInsideWords(text, endPosition,  openToken))
         {
             var tagContent = tags[openToken.OpenTagType].Content;
-            var content = $"{tagContent}{text.Substring(openToken.TextStartPosition, endPosition - openToken.TextStartPosition)}{tagContent}";
+            var content = $"{tagContent}{text.Substring(openToken.TextStartPosition, length)}{tagContent}";
             return new Token(TagType.None, content);
         }
         
         if (openToken.NestedTokens is [{ TagType: TagType.None }] || openToken.NestedTokens.Count == 0)
         {
-            return new Token(openToken.OpenTagType, text.Substring(openToken.TextStartPosition, endPosition - openToken.TextStartPosition));
+            return new Token(openToken.OpenTagType, text.Substring(openToken.TextStartPosition, length));
         }
 
-        return new Token(openToken.OpenTagType, text.Substring(openToken.TextStartPosition, endPosition - openToken.TextStartPosition), openToken.NestedTokens);
+        return new Token(openToken.OpenTagType, text.Substring(openToken.TextStartPosition, length), openToken.NestedTokens);
     }
     
     private static Token CreateTokenForPairedTagWithoutPair(string text, int endPosition, OpenToken openToken)
@@ -354,7 +356,7 @@ public class MarkdownParser: IParser
     
     private static TagType GetTagType(string text, int position, Stack<OpenToken> tokensWithOpenTag)
     {
-        var possibleTags = new Dictionary<TagType, Tag>();
+        var possibleTags = new Dictionary<TagType, MarkdownTag>();
         
         foreach (var keyValuePair in tags)
         {
@@ -381,7 +383,7 @@ public class MarkdownParser: IParser
     }
 
     private static bool CheckAdditionalConditionsForTag(string text, int position, Stack<OpenToken> tokensWithOpenTag,
-        KeyValuePair<TagType, Tag> keyValuePair, Dictionary<TagType, Tag> possibleTags)
+        KeyValuePair<TagType, MarkdownTag> keyValuePair, Dictionary<TagType, MarkdownTag> possibleTags)
     {
         switch (keyValuePair.Key)
         {
