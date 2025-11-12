@@ -205,16 +205,19 @@ public class MarkdownParserTests
         yield return new TestCaseData("# wordA\n # ",
             new[]
             {
-                new Token(TagType.Header, "wordA\n # ",
-                    [new Token(TagType.None, "wordA"), new Token(TagType.EndOfLine, "")]),
-                new Token(TagType.None, " # ")
+                new Token(TagType.Header, "wordA"),
+                new Token(TagType.None, "\n # ")
             });
 
         yield return new TestCaseData(" wordA\n\n# wordB",
             new[]
             {
-                new Token(TagType.None, " wordA"), new Token(TagType.EndOfLine, ""),
-                new Token(TagType.EndOfLine, ""), new Token(TagType.Header, "wordB")
+                new Token(TagType.None, " wordA\n\n"), new Token(TagType.Header, "wordB")
+            });
+        yield return new TestCaseData(" wordA\r\n\r\n# wordB",
+            new[]
+            {
+                new Token(TagType.None, " wordA\r\n\r\n"), new Token(TagType.Header, "wordB")
             });
     }
 
@@ -261,9 +264,10 @@ public class MarkdownParserTests
 
     public static IEnumerable<TestCaseData> CasesWhenTextWithNumbersAndContainsBoldItalicTags()
     {
-        yield return new TestCaseData("__word1 word2 word3__",
-            new[] { new Token(TagType.None, "__word1 word2 word3__") });
-        yield return new TestCaseData("_word1 word2 word3_", new[] { new Token(TagType.None, "_word1 word2 word3_") });
+        yield return new TestCaseData("wo__rd1__",
+            new[] { new Token(TagType.None, "wo"), new Token(TagType.None, "__rd1__") });
+        yield return new TestCaseData("wo_rd1_",
+            new[] { new Token(TagType.None, "wo"), new Token(TagType.None, "_rd1_") });
     }
 
     public static IEnumerable<TestCaseData> CasesWhenTextWithWhiteSpaceAndContainsBoldItalicTags()

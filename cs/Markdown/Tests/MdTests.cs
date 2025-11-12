@@ -163,8 +163,9 @@ public class MdTests
         yield return new TestCaseData("# wordA", "<h1>wordA</h1>");
         yield return new TestCaseData("# wordA # ", "<h1>wordA # </h1>");
         yield return new TestCaseData(" # wordA", " # wordA");
-        yield return new TestCaseData("# wordA\n # ", "<h1>wordA\n</h1> # ");
+        yield return new TestCaseData("# wordA\n # ", "<h1>wordA</h1>\n # ");
         yield return new TestCaseData(" wordA\n\n# wordB", " wordA\n\n<h1>wordB</h1>");
+        yield return new TestCaseData(" wordA\r\n\r\n# wordB", " wordA\r\n\r\n<h1>wordB</h1>");
     }
 
     public static IEnumerable<TestCaseData> CasesWhenTextContainsEscapingTag()
@@ -191,8 +192,8 @@ public class MdTests
 
     public static IEnumerable<TestCaseData> CasesWhenTextWithNumbersAndContainsBoldItalicTags()
     {
-        yield return new TestCaseData("__word1 word2 word3__", "__word1 word2 word3__");
-        yield return new TestCaseData("_word1 word2 word3_", "_word1 word2 word3_");
+        yield return new TestCaseData("wo__rd1__", "wo__rd1__");
+        yield return new TestCaseData("wo_rd1_", "wo_rd1_");
     }
 
     public static IEnumerable<TestCaseData> CasesWhenTextWithWhiteSpaceAndContainsBoldItalicTags()
