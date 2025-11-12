@@ -15,15 +15,6 @@ public class BoldMarkdownTag() : MarkdownTag(TagType.Bold, "__", true)
         else
             isSatisfiesConditions = true;
 
-        // if (TagType == TagType.Italic)
-        // {
-        //     var isContainsTagItalic = text.AsSpan(position, TagText.Length).Equals(TagText, StringComparison.Ordinal);
-        //     var tagBoldLength = markdownTags[TagType.Bold].TagText.Length;
-        //     var isContainsTagBold = tagBoldLength + position <= text.Length && text.AsSpan(position, tagBoldLength)
-        //         .Equals(markdownTags[TagType.Bold].TagText, StringComparison.Ordinal);
-        //     return isContainsTagItalic && !isContainsTagBold && isSatisfiesConditions;
-        // }
-
         return text.AsSpan(position, TagText.Length).Equals(TagText, StringComparison.Ordinal) && isSatisfiesConditions;
     }
 }
