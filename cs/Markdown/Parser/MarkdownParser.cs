@@ -164,7 +164,6 @@ public class MarkdownParser : IParser
         var tagLength = tags[openToken.OpenTagType].Content.Length;
         var symbolBeforeStartTag = openToken.TextStartPosition - tagLength - 1;
 
-
         var isStartTagInMiddleWord = symbolBeforeStartTag >= 0 &&
                                      !char.IsWhiteSpace(text[openToken.TextStartPosition]) &&
                                      !char.IsWhiteSpace(text[symbolBeforeStartTag]);

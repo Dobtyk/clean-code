@@ -15,34 +15,35 @@ public class HtmlRenderer : IRenderer
         //{ TagType.Link, "<strong>" },
     };
     
-    public string Render(IEnumerable<Token> tokens)
+    public string Render(IEnumerable<Token> tokens, string text)
     {
-        var stringBuilder = new StringBuilder();
+        var stringBuilder = new StringBuilder(text.Length);
         
         foreach (var token in tokens)
         {
-            stringBuilder.Append(RenderToken(token));
+            RenderToken(token, stringBuilder);
         }
         
         return stringBuilder.ToString();
     }
     
-    private string RenderToken(Token token)
+    private void RenderToken(Token token, StringBuilder builder)
     {
         var tag = tags[token.TagType];
         if (token.Children is null)
         {
-            return tag.IsPairedTag ? $"{tag.StartTag}{token.Content}{tag.EndTag}" : $"{tag.StartTag}{token.Content}";
+            var content = tag.IsPairedTag
+                ? $"{tag.StartTag}{token.Content}{tag.EndTag}"
+                : $"{tag.StartTag}{token.Content}";
+            builder.Append(content);
+            return;
         }
-
-        var stringBuilder = new StringBuilder();
+        
+        builder.Append(tag.StartTag);
         foreach (var child in token.Children)
         {
-            stringBuilder.Append(RenderToken(child));
+            RenderToken(child, builder);
         }
-        stringBuilder.Insert(0, tag.StartTag);
-        stringBuilder.Append(tag.EndTag);
-        
-        return stringBuilder.ToString();
+        builder.Append(tag.EndTag);
     }
 }
