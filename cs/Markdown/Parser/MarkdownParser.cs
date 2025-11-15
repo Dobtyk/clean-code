@@ -12,6 +12,8 @@ public class MarkdownParser : IParser
         { TagType.None, new NoneMarkdownTag() }
         //{ TagType.Link, "" },
     };
+    
+    private readonly List<MarkdownTag> possibleTags = [];
 
     public IEnumerable<Token> Parse(string text)
     {
@@ -291,9 +293,9 @@ public class MarkdownParser : IParser
         return new Token(TagType.None, text.Substring(startPosition, endPosition - startPosition));
     }
 
-    private static MarkdownTag GetTag(string text, int position, Stack<OpenToken> tokensWithOpenTag)
+    private MarkdownTag GetTag(string text, int position, Stack<OpenToken> tokensWithOpenTag)
     {
-        var possibleTags = new List<MarkdownTag>();
+        possibleTags.Clear();
 
         foreach (var tag in markdownTagsByType.Values)
         {

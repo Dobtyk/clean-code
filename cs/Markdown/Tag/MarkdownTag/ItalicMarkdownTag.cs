@@ -4,9 +4,6 @@ public class ItalicMarkdownTag() : MarkdownTag(TagType.Italic, "_", true)
 {
     public override bool IsTag(string text, int position, bool isSameTagAlreadyOpen)
     {
-        if (TagType != TagType.Bold && TagType != TagType.Italic)
-            throw new ArgumentException("Tag Italic or Bold was expected, but another tag was received");
-        
         var isSatisfiesConditions = false;
         if (isSameTagAlreadyOpen)
             isSatisfiesConditions = !char.IsWhiteSpace(text[position - 1]);
