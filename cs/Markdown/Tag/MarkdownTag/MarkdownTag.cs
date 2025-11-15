@@ -3,9 +3,14 @@
 public abstract class MarkdownTag(TagType tagType, string tagText, bool isPairedTag, int? tagLength = null)
 {
     public TagType TagType { get; } = tagType;
-    public virtual string TagText { get; } = tagText;
-    public virtual bool IsPairedTag { get; } = isPairedTag;
-    public virtual int TotalTagLength { get; init; } = tagLength ?? tagText.Length;
+    public string TagText { get; } = tagText;
+    public bool IsPairedTag { get; } = isPairedTag;
+    public int TotalTagLength { get; } = tagLength ?? tagText.Length;
     
-    public abstract bool IsTag(string text, int position, bool isSameTagAlreadyOpen);
+    public abstract bool IsStartOfTag(string text, int position, bool isSameTagAlreadyOpen);
+
+    public virtual bool IsTagCorrect(string text, int endPosition, OpenToken openToken)
+    {
+        return true;
+    }
 }

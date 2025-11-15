@@ -12,7 +12,7 @@ public class MarkdownParser : IParser
         { TagType.None, new NoneMarkdownTag() }
         //{ TagType.Link, "" },
     };
-    
+
     private readonly List<MarkdownTag> possibleTags = [];
 
     public IEnumerable<Token> Parse(string text)
@@ -42,7 +42,7 @@ public class MarkdownParser : IParser
             }
 
             if (currentTag.TagType == TagType.EndOfLine &&
-                tokensWithOpenTag.Select(a => a.OpenTag.TagType).Contains(TagType.Header))
+                tokensWithOpenTag.Any(a => a.OpenTag.TagType == TagType.Header))
                 openTokenWithEmptyTag = new OpenToken(markdownTagsByType[TagType.None], i);
 
             if (currentTag.IsPairedTag)
@@ -57,14 +57,6 @@ public class MarkdownParser : IParser
 
         return result;
     }
-    
-    private static bool ContainsTagType(Stack<OpenToken> tokensWithOpenTag, TagType tagType) => 
-        tokensWithOpenTag.Any(t => t.OpenTag.TagType == tagType);
-    
-
-    private static bool IsTopTagType(Stack<OpenToken> tokensWithOpenTag, TagType tagType) =>
-        tokensWithOpenTag.Count > 0 && tokensWithOpenTag.Peek().OpenTag.TagType == tagType;
-    
 
     #region Processing Tags
 
@@ -98,18 +90,19 @@ public class MarkdownParser : IParser
         }
     }
 
-    private static void ProcessTagEndOfLine(string text, Stack<OpenToken> stack, int position, List<Token> result)
+    private static void ProcessTagEndOfLine(string text, Stack<OpenToken> tokensWithOpenTag, int position,
+        List<Token> result)
     {
-        if (!ContainsTagType(stack, TagType.Header))
+        if (tokensWithOpenTag.All(t => t.OpenTag.TagType != TagType.Header))
             return;
 
-        while (stack.Count > 0 && !IsTopTagType(stack, TagType.Header))
-            stack.Pop();
+        while (!tokensWithOpenTag.IsPeekTagType(TagType.Header))
+            tokensWithOpenTag.Pop();
 
-        if (stack.Count > 0)
+        if (tokensWithOpenTag.Count > 0)
         {
-            var headerToken = stack.Pop();
-            AddToken(CreateToken(text, position, headerToken), stack, result);
+            var headerToken = tokensWithOpenTag.Pop();
+            AddToken(CreateToken(text, position, headerToken), tokensWithOpenTag, result);
         }
     }
 
@@ -119,12 +112,12 @@ public class MarkdownParser : IParser
         if (!currentTag.IsPairedTag)
             throw new ArgumentException("Paired tag was expected, but unpaired tag was received");
 
-        if (IsTopTagType(tokensWithOpenTag, currentTag.TagType) && tokensWithOpenTag.Peek().OpenTag.Equals(currentTag))
+        if (tokensWithOpenTag.IsPeekTagType(currentTag.TagType))
         {
             var openToken = tokensWithOpenTag.Pop();
             AddToken(CreateToken(text, position, openToken), tokensWithOpenTag, result);
         }
-        else if (!ContainsTagType(tokensWithOpenTag, currentTag.TagType))
+        else if (tokensWithOpenTag.All(t => t.OpenTag.TagType != currentTag.TagType))
         {
             tokensWithOpenTag.Push(new OpenToken(currentTag, position + currentTag.TagText.Length));
         }
@@ -134,87 +127,23 @@ public class MarkdownParser : IParser
 
     #region BorderlineCases
 
-    /// <returns>
-    ///     <c>true</c> - if the Bold or Italic tags are located inside words;
-    /// </returns>
-    private static bool CheckOpenTokenTagBoldOrItalicLocatedInsideWords(string text, int endPosition,
-        OpenToken openToken)
+    private static OpenToken ConvertTagBoldInsideTagItalic(OpenToken openToken)
     {
-        if (openToken.OpenTag.TagType != TagType.Bold && openToken.OpenTag.TagType != TagType.Italic) return false;
+        if (openToken.OpenTag.TagType == TagType.Italic && openToken.NestedTokens.Count > 0)
+            for (var i = 0; i < openToken.NestedTokens.Count; i++)
+                openToken.NestedTokens[i] = ConvertTagBoldToTagNone(openToken.NestedTokens[i]);
 
-        var tagLength = openToken.OpenTag.TagText.Length;
-        var symbolBeforeStartTag = openToken.TextStartPosition - tagLength - 1;
-
-        var isStartTagInMiddleWord = symbolBeforeStartTag >= 0 &&
-                                     !char.IsWhiteSpace(text[openToken.TextStartPosition]) &&
-                                     !char.IsWhiteSpace(text[symbolBeforeStartTag]);
-        var isEndTagInMiddleWord = endPosition + tagLength < text.Length &&
-                                   !char.IsWhiteSpace(text[endPosition + tagLength]) &&
-                                   !char.IsWhiteSpace(text[endPosition - 1]);
-        var textContainsSeveralWords = false;
-
-        var part = text.AsSpan(openToken.TextStartPosition, endPosition - openToken.TextStartPosition);
-
-        foreach (var symbol in part)
-            if (char.IsWhiteSpace(symbol))
-            {
-                textContainsSeveralWords = true;
-                break;
-            }
-
-        return (isStartTagInMiddleWord || isEndTagInMiddleWord) && textContainsSeveralWords;
-    }
-
-    private static bool IsTokenHighlightsPartOfWordWithDigits(string text, int endPosition, OpenToken openToken)
-    {
-        var tagLength = openToken.OpenTag.TagText.Length;
-        var symbolBeforeStartTag = openToken.TextStartPosition - tagLength - 1;
-        var isStartTagInMiddleWord = symbolBeforeStartTag >= 0 &&
-                                     !char.IsWhiteSpace(text[openToken.TextStartPosition]) &&
-                                     !char.IsWhiteSpace(text[symbolBeforeStartTag]);
-        var isEndTagInMiddleWord = endPosition + tagLength < text.Length &&
-                                   !char.IsWhiteSpace(text[endPosition + tagLength]) &&
-                                   !char.IsWhiteSpace(text[endPosition - 1]);
-
-        var isOnlyPartOfWordHighlighted = isStartTagInMiddleWord || isEndTagInMiddleWord;
-        var partText = text.Substring(openToken.TextStartPosition, endPosition - openToken.TextStartPosition);
-        
-        return isOnlyPartOfWordHighlighted && partText.All(char.IsLetterOrDigit) && partText.Any(char.IsDigit);
-    }
-
-    private static Token ProcessEmptyUnderscores(Token token)
-    {
-        if (token is { TagType: TagType.Bold, Content.Length: 0, Children: null })
-            token = new Token(TagType.None,
-                string.Concat(Enumerable.Repeat(markdownTagsByType[TagType.Bold].TagText, 2)));
-
-        return token;
-    }
-
-    private static Token ConvertTagBoldInsideTagItalic(Token token)
-    {
-        if (token is { TagType: TagType.Italic, Children: not null })
-        {
-            var result = new Token(TagType.Italic, token.Content, []);
-            foreach (var child in token.Children) result.Children!.Add(ConvertTagBoldToTagNone(child));
-            return result;
-        }
-
-        if (token is { Children: not null })
-            for (var i = 0; i < token.Children.Count; i++)
-                token.Children[i] = ConvertTagBoldInsideTagItalic(token.Children[i]);
-
-        return token;
+        return openToken;
     }
 
     private static Token ConvertTagBoldToTagNone(Token token)
     {
         if (token.TagType == TagType.Bold)
         {
-            var tagContent = markdownTagsByType[TagType.Bold].TagText;
-            var newContent = $"{tagContent}{token.Content}{tagContent}";
+            var tagText = markdownTagsByType[TagType.Bold].TagText;
+            var newText = $"{tagText}{token.Content}{tagText}";
             var children = token.Children?.Select(ConvertTagBoldToTagNone).ToList();
-            return new Token(TagType.None, newContent, children);
+            return new Token(TagType.None, newText, children);
         }
 
         if (token.Children != null)
@@ -267,24 +196,20 @@ public class MarkdownParser : IParser
     {
         var length = endPosition - openToken.TextStartPosition;
 
-        var result = new Token(openToken.OpenTag.TagType, text.Substring(openToken.TextStartPosition, length),
-            openToken.NestedTokens);
+        if (openToken.OpenTag.TagType == TagType.Italic) openToken = ConvertTagBoldInsideTagItalic(openToken);
 
-        if (CheckOpenTokenTagBoldOrItalicLocatedInsideWords(text, endPosition, openToken) ||
-            (openToken.OpenTag.TagType is TagType.Bold or TagType.Italic &&
-             IsTokenHighlightsPartOfWordWithDigits(text, endPosition, openToken)))
+        if (!markdownTagsByType[openToken.OpenTag.TagType].IsTagCorrect(text, endPosition, openToken))
         {
-            var tagContent = openToken.OpenTag.TagText;
-            var content = $"{tagContent}{text.Substring(openToken.TextStartPosition, length)}{tagContent}";
+            var tagText = openToken.OpenTag.TagText;
+            var content = $"{tagText}{text.Substring(openToken.TextStartPosition, length)}{tagText}";
             return new Token(TagType.None, content);
         }
 
         if (openToken.NestedTokens is [{ TagType: TagType.None }] || openToken.NestedTokens.Count == 0)
-            result = new Token(openToken.OpenTag.TagType, text.Substring(openToken.TextStartPosition, length));
+            return new Token(openToken.OpenTag.TagType, text.Substring(openToken.TextStartPosition, length));
 
-        result = ProcessEmptyUnderscores(result);
-        result = ConvertTagBoldInsideTagItalic(result);
-        return result;
+        return new Token(openToken.OpenTag.TagType, text.Substring(openToken.TextStartPosition, length),
+            openToken.NestedTokens);
     }
 
     private static Token CreateTokenForPairedTagWithoutPair(string text, int endPosition, OpenToken openToken)
@@ -298,19 +223,9 @@ public class MarkdownParser : IParser
         possibleTags.Clear();
 
         foreach (var tag in markdownTagsByType.Values)
-        {
-            if (tag.TagText.Length + position > text.Length) continue;
-
-            if (tag.IsTag(text, position, ContainsTagType(tokensWithOpenTag, tag.TagType))) possibleTags.Add(tag);
-        }
+            if (tag.IsStartOfTag(text, position, tokensWithOpenTag.Any(t => t.OpenTag.TagType == tag.TagType)))
+                possibleTags.Add(tag);
 
         return possibleTags.OrderByDescending(x => x.TagText.Length).First();
-    }
-
-    private class OpenToken(MarkdownTag openTag, int textStartPosition)
-    {
-        public readonly MarkdownTag OpenTag = openTag;
-        public readonly int TextStartPosition = textStartPosition;
-        public readonly List<Token> NestedTokens = [];
     }
 }

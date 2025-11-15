@@ -202,22 +202,17 @@ public class MarkdownParserTests
         yield return new TestCaseData("# wordA # ", new[] { new Token(TagType.Header, "wordA # ") });
         yield return new TestCaseData(" # wordA", new[] { new Token(TagType.None, " # wordA") });
 
-        yield return new TestCaseData("# wordA\n # ",
+        yield return new TestCaseData($"# wordA{Environment.NewLine} # ",
             new[]
             {
                 new Token(TagType.Header, "wordA"),
-                new Token(TagType.None, "\n # ")
+                new Token(TagType.None, $"{Environment.NewLine} # ")
             });
 
-        yield return new TestCaseData(" wordA\n\n# wordB",
+        yield return new TestCaseData($" wordA{Environment.NewLine}{Environment.NewLine}# wordB",
             new[]
             {
-                new Token(TagType.None, " wordA\n\n"), new Token(TagType.Header, "wordB")
-            });
-        yield return new TestCaseData(" wordA\r\n\r\n# wordB",
-            new[]
-            {
-                new Token(TagType.None, " wordA\r\n\r\n"), new Token(TagType.Header, "wordB")
+                new Token(TagType.None, $" wordA{Environment.NewLine}{Environment.NewLine}"), new Token(TagType.Header, "wordB")
             });
     }
 

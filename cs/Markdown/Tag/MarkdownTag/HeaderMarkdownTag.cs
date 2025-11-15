@@ -2,18 +2,15 @@
 
 public class HeaderMarkdownTag() : MarkdownTag(TagType.Header, "# ", false)
 {
-    public override bool IsTag(string text, int position, bool isSameTagAlreadyOpen)
+    public override bool IsStartOfTag(string text, int position, bool isSameTagAlreadyOpen)
     {
-        var doubleNewLineUnix = "\n\n";
-        var doubleNewLineWindows = "\r\n\r\n";
+        if (TagText.Length + position > text.Length) return false;
         
-        var isNewParagraphWindows = position == 0 || (position >= 4 && text.AsSpan(position - 4, 4)
-            .Equals(doubleNewLineWindows, StringComparison.Ordinal));
+        var doubleNewLine = string.Concat(Enumerable.Repeat(Environment.NewLine, 2));
+        var length = doubleNewLine.Length;
         
-        var isNewParagraphUnix = position == 0 || (position >= 2 && text.AsSpan(position - 2, 2)
-            .Equals(doubleNewLineUnix, StringComparison.Ordinal));
-        
-        var isNewParagraph = isNewParagraphWindows || isNewParagraphUnix;
+        var isNewParagraph = position == 0 || (position >= length && text.AsSpan(position - length, length)
+            .Equals(doubleNewLine, StringComparison.Ordinal));
 
         return text.AsSpan(position, TagText.Length).Equals(TagText, StringComparison.Ordinal) && isNewParagraph &&
                !isSameTagAlreadyOpen;

@@ -1,13 +1,12 @@
 ﻿namespace Markdown;
 
-public class EndOfLineMarkdownTag() : MarkdownTag(TagType.EndOfLine, "\n", false)
+public class EndOfLineMarkdownTag() : MarkdownTag(TagType.EndOfLine, Environment.NewLine, false)
 {
-    public override bool IsTag(string text, int position, bool isSameTagAlreadyOpen)
+    public override bool IsStartOfTag(string text, int position, bool isSameTagAlreadyOpen)
     {
-        if (text.AsSpan(position, TagText.Length).Equals(TagText, StringComparison.Ordinal))
-        {
-            return true;
-        }
+        if (TagText.Length + position > text.Length) return false;
+        
+        if (text.AsSpan(position, TagText.Length).Equals(TagText, StringComparison.Ordinal)) return true;
         return false;
     }
 }

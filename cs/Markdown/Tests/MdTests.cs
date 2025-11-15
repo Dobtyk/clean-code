@@ -163,9 +163,8 @@ public class MdTests
         yield return new TestCaseData("# wordA", "<h1>wordA</h1>");
         yield return new TestCaseData("# wordA # ", "<h1>wordA # </h1>");
         yield return new TestCaseData(" # wordA", " # wordA");
-        yield return new TestCaseData("# wordA\n # ", "<h1>wordA</h1>\n # ");
-        yield return new TestCaseData(" wordA\n\n# wordB", " wordA\n\n<h1>wordB</h1>");
-        yield return new TestCaseData(" wordA\r\n\r\n# wordB", " wordA\r\n\r\n<h1>wordB</h1>");
+        yield return new TestCaseData($"# wordA{Environment.NewLine} # ", $"<h1>wordA</h1>{Environment.NewLine} # ");
+        yield return new TestCaseData($" wordA{Environment.NewLine}{Environment.NewLine}# wordB", $" wordA{Environment.NewLine}{Environment.NewLine}<h1>wordB</h1>");
     }
 
     public static IEnumerable<TestCaseData> CasesWhenTextContainsEscapingTag()

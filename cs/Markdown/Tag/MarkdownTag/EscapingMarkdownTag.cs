@@ -4,9 +4,9 @@ public class EscapingMarkdownTag() : MarkdownTag(TagType.Escaping, "\\", false, 
 {
     private static readonly List<char> escapeSymbols = ['\\', '#', '_'];
     
-    public override bool IsTag(string text, int position, bool isSameTagAlreadyOpen)
+    public override bool IsStartOfTag(string text, int position, bool isSameTagAlreadyOpen)
     {
-        if (text.Length <= position + 1) return false;
+        if (TotalTagLength + position > text.Length) return false;
 
         var isCanEscaping = escapeSymbols.Contains(text[position + 1]);
 
