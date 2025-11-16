@@ -77,7 +77,7 @@ public class MarkdownParser : IParser
                 break;
             }
             case TagType.EndOfLine:
-                ProcessTagEndOfLine(text, tokensWithOpenTag, position, result);
+                HeaderMarkdownTag.ProcessEndTag(text, tokensWithOpenTag, position, result);
                 break;
             case TagType.Escaping:
             {
@@ -90,29 +90,13 @@ public class MarkdownParser : IParser
         }
     }
 
-    private static void ProcessTagEndOfLine(string text, Stack<OpenToken> tokensWithOpenTag, int position,
-        List<Token> result)
-    {
-        if (tokensWithOpenTag.All(t => t.OpenTag.TagType != TagType.Header))
-            return;
-
-        while (!tokensWithOpenTag.IsPeekTagType(TagType.Header))
-            tokensWithOpenTag.Pop();
-
-        if (tokensWithOpenTag.Count > 0)
-        {
-            var headerToken = tokensWithOpenTag.Pop();
-            AddToken(CreateToken(text, position, headerToken), tokensWithOpenTag, result);
-        }
-    }
-
     private static void ProcessPairedTag(string text, MarkdownTag currentTag, Stack<OpenToken> tokensWithOpenTag,
         int position, List<Token> result)
     {
         if (!currentTag.IsPairedTag)
             throw new ArgumentException("Paired tag was expected, but unpaired tag was received");
 
-        if (tokensWithOpenTag.IsPeekTagType(currentTag.TagType))
+        if (tokensWithOpenTag.IsPeekEqual(currentTag.TagType))
         {
             var openToken = tokensWithOpenTag.Pop();
             AddToken(CreateToken(text, position, openToken), tokensWithOpenTag, result);
@@ -184,7 +168,7 @@ public class MarkdownParser : IParser
         return listTokens;
     }
 
-    private static void AddToken(Token token, Stack<OpenToken> tokensWithOpenTag, List<Token> result)
+    public static void AddToken(Token token, Stack<OpenToken> tokensWithOpenTag, List<Token> result)
     {
         if (tokensWithOpenTag.Count == 0)
             result.Add(token);
@@ -192,7 +176,7 @@ public class MarkdownParser : IParser
             tokensWithOpenTag.Peek().NestedTokens.Add(token);
     }
 
-    private static Token CreateToken(string text, int endPosition, OpenToken openToken)
+    public static Token CreateToken(string text, int endPosition, OpenToken openToken)
     {
         var length = endPosition - openToken.TextStartPosition;
 
