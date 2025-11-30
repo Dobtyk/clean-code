@@ -27,18 +27,19 @@ public class MarkdownParser : IParser
         {
             var currentTag = GetTag(text, i, tokensWithOpenTag);
 
-            if (currentTag.TagType == TagType.Link && LinkMarkdownTag.TryProcessTag(text, i, out var resultLinkToken))
+            switch (currentTag.TagType)
             {
-                currentTagLength = resultLinkToken.lengthTag;
-                result.Add(resultLinkToken.token);
-                continue;
-            }
-
-            if (currentTag.TagType is TagType.Link or TagType.None)
-            {
-                currentTagLength = 1;
-                openTokenWithEmptyTag ??= new OpenToken(markdownTagsByType[TagType.None], i); 
-                continue;
+                case TagType.Link when LinkMarkdownTag.TryProcessTag(text, i, out var resultLinkToken):
+                    currentTagLength = resultLinkToken.lengthTag;
+                    result.Add(resultLinkToken.token);
+                    continue;
+                case TagType.Link or TagType.None:
+                    currentTagLength = 1;
+                    openTokenWithEmptyTag ??= new OpenToken(markdownTagsByType[TagType.None], i); 
+                    continue;
+                case TagType.EndOfLine when tokensWithOpenTag.Any(a => a.OpenTag.TagType == TagType.Header):
+                    openTokenWithEmptyTag = new OpenToken(markdownTagsByType[TagType.None], i);
+                    break;
             }
 
             if (openTokenWithEmptyTag is not null && currentTag.TagType != TagType.EndOfLine)
@@ -47,10 +48,6 @@ public class MarkdownParser : IParser
                 AddToken(token, tokensWithOpenTag, result);
                 openTokenWithEmptyTag = null;
             }
-
-            if (currentTag.TagType == TagType.EndOfLine &&
-                tokensWithOpenTag.Any(a => a.OpenTag.TagType == TagType.Header))
-                openTokenWithEmptyTag = new OpenToken(markdownTagsByType[TagType.None], i);
 
             if (currentTag.IsPairedTag)
                 ProcessPairedTag(text, currentTag, tokensWithOpenTag, i, result);
