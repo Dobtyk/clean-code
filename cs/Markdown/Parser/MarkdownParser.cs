@@ -1,4 +1,6 @@
-﻿namespace Markdown;
+﻿using System.ComponentModel.Design;
+
+namespace Markdown;
 
 public class MarkdownParser : IParser
 {
@@ -9,8 +11,8 @@ public class MarkdownParser : IParser
         { TagType.Bold, new BoldMarkdownTag() },
         { TagType.Escaping, new EscapingMarkdownTag() },
         { TagType.EndOfLine, new EndOfLineMarkdownTag() },
-        { TagType.None, new NoneMarkdownTag() }
-        //{ TagType.Link, "" },
+        { TagType.None, new NoneMarkdownTag() },
+        { TagType.Link, new LinkMarkdownTag() }
     };
 
     private readonly List<MarkdownTag> possibleTags = [];
@@ -27,6 +29,18 @@ public class MarkdownParser : IParser
         {
             var currentTag = GetTag(text, i, tokensWithOpenTag);
 
+            if (currentTag.TagType == TagType.Link && LinkMarkdownTag.TryProcessTag(text, i, out var resultLinkToken))
+            {
+                currentTagLength = resultLinkToken.lengthTag;
+                result.Add(resultLinkToken.token);
+                continue;
+            }
+            
+            if (currentTag.TagType == TagType.Link)
+            {
+                currentTag = new NoneMarkdownTag();
+            }
+            
             if (currentTag.TagType is TagType.None or TagType.EndOfLine)
             {
                 currentTagLength = 1;
@@ -116,7 +130,6 @@ public class MarkdownParser : IParser
         if (openToken.OpenTag.TagType == TagType.Italic && openToken.NestedTokens.Count > 0)
             for (var i = 0; i < openToken.NestedTokens.Count; i++)
                 openToken.NestedTokens[i] = ConvertTagBoldToTagNone(openToken.NestedTokens[i]);
-
         return openToken;
     }
 
@@ -194,6 +207,11 @@ public class MarkdownParser : IParser
 
         return new Token(openToken.OpenTag.TagType, text.Substring(openToken.TextStartPosition, length),
             openToken.NestedTokens);
+    }
+    
+    public static TokenTagLink CreateLinkToken(string content, string linkText, string? tooltipText)
+    {
+        return new TokenTagLink(content, linkText, tooltipText);
     }
 
     private static Token CreateTokenForPairedTagWithoutPair(string text, int endPosition, OpenToken openToken)

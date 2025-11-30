@@ -6,5 +6,5 @@ public class Token(TagType tagType, string content, List<Token>? children = null
 
     public string Content { get; } = content;
 
-    public List<Token>? Children { get; set; } = children;
+    public List<Token>? Children { get; } = children;
 }

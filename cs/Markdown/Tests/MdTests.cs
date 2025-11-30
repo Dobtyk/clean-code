@@ -127,6 +127,14 @@ public class MdTests
 
         result.Should().Be(expectedResult);
     }
+    
+    [TestCaseSource(nameof(CasesWhenTextContainsLinkTag))]
+    public void Parse_ReturnsIEnumerableTokens_WhenTextContainsLinkTag(string input, string expectedResult)
+    {
+        var result = markdown.Render(input);
+
+        result.Should().Be(expectedResult);
+    }
 
     public static IEnumerable<TestCaseData> CasesWhenTextWithOnePairedTag()
     {
@@ -210,4 +218,20 @@ public class MdTests
         yield return new TestCaseData("_wordA wor_dB", "_wordA wor_dB");
         yield return new TestCaseData("__wordA wor__dB", "__wordA wor__dB");
     }
+    public static IEnumerable<TestCaseData> CasesWhenTextContainsLinkTag()
+    {
+        yield return new TestCaseData("[Name Link](https://www.example.com \"Tooltip\")",
+            "<a href=\"https://www.example.com\" title=\"Tooltip\">Name Link</a>");
+        yield return new TestCaseData("[Name Link](https://www.example.com Tooltip\")",
+            "<a href=\"https://www.example.com Tooltip\"\">Name Link</a>");
+        yield return new TestCaseData("Name Link](https://www.example.com Tooltip\")",
+            "Name Link](https://www.example.com Tooltip\")");
+        yield return new TestCaseData("[Name Link(https://www.example.com Tooltip\")",
+            "[Name Link(https://www.example.com Tooltip\")");
+        yield return new TestCaseData("[Name Link]https://www.example.com Tooltip\")",
+            "[Name Link]https://www.example.com Tooltip\")");
+        yield return new TestCaseData("[Name Link](https://www.example.com Tooltip\"",
+            "[Name Link](https://www.example.com Tooltip\"");
+    }
+    
 }

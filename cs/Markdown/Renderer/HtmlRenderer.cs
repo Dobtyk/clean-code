@@ -12,7 +12,6 @@ public class HtmlRenderer : IRenderer
         { TagType.Bold, new HtmlTag(true, "<strong>", "</strong>") },
         { TagType.Escaping, new HtmlTag(true, "\\") },
         { TagType.EndOfLine, new HtmlTag(false, "\n") }
-        //{ TagType.Link, "<strong>" },
     };
     
     public string Render(IEnumerable<Token> tokens, string text)
@@ -29,7 +28,14 @@ public class HtmlRenderer : IRenderer
     
     private void RenderToken(Token token, StringBuilder builder)
     {
+        if (token.TagType == TagType.Link)
+        {
+            RenderLinkToken((TokenTagLink)token,  builder);
+            return;
+        }
+        
         var tag = tags[token.TagType];
+        
         if (token.Children is null)
         {
             var content = tag.IsPairedTag
@@ -45,5 +51,13 @@ public class HtmlRenderer : IRenderer
             RenderToken(child, builder);
         }
         builder.Append(tag.EndTag);
+    }
+    
+    private void RenderLinkToken(TokenTagLink token, StringBuilder builder)
+    {
+        var content = token.TooltipText is not null
+            ? $"{LinkHtmlTag.StartLinkTag}{token.LinkText}{LinkHtmlTag.EndLinkTag} {LinkHtmlTag.StartTitleTag}{token.TooltipText}{LinkHtmlTag.EndTitleTag}>{token.Content}{LinkHtmlTag.EndTag}"
+            : $"{LinkHtmlTag.StartLinkTag}{token.LinkText}{LinkHtmlTag.EndLinkTag}>{token.Content}{LinkHtmlTag.EndTag}";
+        builder.Append(content);
     }
 }

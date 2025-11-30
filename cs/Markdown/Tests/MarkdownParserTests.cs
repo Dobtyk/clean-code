@@ -144,6 +144,15 @@ public class MarkdownParserTests
 
         result.Should().BeEquivalentTo(expectedResult, options => options.WithStrictOrdering());
     }
+    
+    [TestCaseSource(nameof(CasesWhenTextContainsLinkTag))]
+    public void Parse_ReturnsIEnumerableTokens_WhenTextContainsLinkTag(string input,
+        IEnumerable<Token> expectedResult)
+    {
+        var result = parser.Parse(input);
+
+        result.Should().BeEquivalentTo(expectedResult, options => options.WithStrictOrdering());
+    }
 
     public static IEnumerable<TestCaseData> CasesWhenTextWithOnePairedTag()
     {
@@ -285,5 +294,21 @@ public class MarkdownParserTests
             new[] { new Token(TagType.None, "_wordA wor_"), new Token(TagType.None, "dB") });
         yield return new TestCaseData("__wordA wor__dB",
             new[] { new Token(TagType.None, "__wordA wor__"), new Token(TagType.None, "dB") });
+    }
+        
+    public static IEnumerable<TestCaseData> CasesWhenTextContainsLinkTag()
+    {
+        yield return new TestCaseData("[Name Link](https://www.example.com \"Tooltip\")",
+            new[] { new TokenTagLink("Name Link", "https://www.example.com", "Tooltip") });
+        yield return new TestCaseData("[Name Link](https://www.example.com Tooltip\")",
+            new[] { new TokenTagLink("Name Link", "https://www.example.com Tooltip\"") });
+        yield return new TestCaseData("Name Link](https://www.example.com Tooltip\")",
+            new[] { new Token(TagType.None, "Name Link](https://www.example.com Tooltip\")") });
+        yield return new TestCaseData("[Name Link(https://www.example.com Tooltip\")",
+            new[] { new Token(TagType.None, "[Name Link(https://www.example.com Tooltip\")") });
+        yield return new TestCaseData("[Name Link]https://www.example.com Tooltip\")",
+            new[] { new Token(TagType.None, "[Name Link]https://www.example.com Tooltip\")") });
+        yield return new TestCaseData("[Name Link](https://www.example.com Tooltip\"",
+            new[] { new Token(TagType.None, "[Name Link](https://www.example.com Tooltip\"") });
     }
 }
