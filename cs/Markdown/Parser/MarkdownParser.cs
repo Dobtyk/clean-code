@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.Design;
-
-namespace Markdown;
+﻿namespace Markdown;
 
 public class MarkdownParser : IParser
 {
@@ -35,17 +33,12 @@ public class MarkdownParser : IParser
                 result.Add(resultLinkToken.token);
                 continue;
             }
-            
-            if (currentTag.TagType == TagType.Link)
-            {
-                currentTag = new NoneMarkdownTag();
-            }
-            
-            if (currentTag.TagType is TagType.None or TagType.EndOfLine)
+
+            if (currentTag.TagType is TagType.Link or TagType.None)
             {
                 currentTagLength = 1;
-                openTokenWithEmptyTag ??= new OpenToken(currentTag, i);
-                if (currentTag.TagType is TagType.None) continue;
+                openTokenWithEmptyTag ??= new OpenToken(markdownTagsByType[TagType.None], i); 
+                continue;
             }
 
             if (openTokenWithEmptyTag is not null && currentTag.TagType != TagType.EndOfLine)
@@ -208,7 +201,7 @@ public class MarkdownParser : IParser
         return new Token(openToken.OpenTag.TagType, text.Substring(openToken.TextStartPosition, length),
             openToken.NestedTokens);
     }
-    
+
     public static TokenTagLink CreateLinkToken(string content, string linkText, string? tooltipText)
     {
         return new TokenTagLink(content, linkText, tooltipText);
